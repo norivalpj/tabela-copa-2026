@@ -1,0 +1,85 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile document",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "createdAt"]
+    },
+    "Bolao": {
+      "title": "Bolão",
+      "description": "A group for placing predictions",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "ownerId", "createdAt"]
+    },
+    "BolaoMember": {
+      "title": "Bolão Member",
+      "description": "Membership of a user in a bolão",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["owner", "member"] },
+        "joinedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "role", "joinedAt"]
+    },
+    "Invite": {
+      "title": "Bolão Invite",
+      "description": "Invite for a user to join a bolão",
+      "type": "object",
+      "properties": {
+        "bolaoId": { "type": "string" },
+        "email": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["bolaoId", "email", "status", "createdAt"]
+    },
+    "Prediction": {
+      "title": "Match Prediction",
+      "description": "A user's prediction for a match in a specific bolão",
+      "type": "object",
+      "properties": {
+        "bolaoId": { "type": "string" },
+        "userId": { "type": "string" },
+        "matchId": { "type": "number" },
+        "score1": { "type": "number" },
+        "score2": { "type": "number" }
+      },
+      "required": ["bolaoId", "userId", "matchId", "score1", "score2"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles."
+    },
+    "boloes/{bolaoId}": {
+      "schema": { "$ref": "#/entities/Bolao" },
+      "description": "Stores bolões (prediction groups)."
+    },
+    "boloes/{bolaoId}/members/{memberId}": {
+      "schema": { "$ref": "#/entities/BolaoMember" },
+      "description": "Stores members of a bolão. memberId is usually the user UID."
+    },
+    "invites/{inviteId}": {
+      "schema": { "$ref": "#/entities/Invite" },
+      "description": "Stores invitations sent via email."
+    },
+    "predictions/{predictionId}": {
+      "schema": { "$ref": "#/entities/Prediction" },
+      "description": "Stores individual predictions."
+    }
+  }
+}

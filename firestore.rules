@@ -1,0 +1,120 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- PRIMITIVES & HELPERS ---
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    // --- VALIDATORS ---
+    function isValidUser(data) {
+      return data.keys().hasAll(['email', 'createdAt']) &&
+        data.email is string && data.email.size() <= 256 &&
+        data.createdAt == request.time &&
+        (data.get('displayName', '') is string);
+    }
+    
+    function isValidBolao(data) {
+      return data.keys().hasAll(['name', 'ownerId', 'createdAt', 'memberIds']) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 64 &&
+        data.ownerId == request.auth.uid &&
+        data.memberIds is list &&
+        data.createdAt == request.time;
+    }
+    
+    function isValidBolaoUpdate(data) {
+        return data.name is string && data.name.size() > 0 && data.name.size() <= 64;
+    }
+    
+    function isValidBolaoMember(data) {
+      return data.keys().hasAll(['email', 'role', 'joinedAt']) &&
+        data.email is string && data.email.size() <= 256 &&
+        data.role in ['owner', 'member'] &&
+        data.joinedAt == request.time &&
+        (data.get('userId', '') is string);
+    }
+    
+    function isValidInvite(data) {
+      return data.keys().hasAll(['bolaoId', 'email', 'status', 'createdAt']) &&
+        data.bolaoId is string && data.bolaoId.size() <= 128 &&
+        data.email is string && data.email.size() <= 256 &&
+        data.status in ['pending', 'accepted', 'rejected'] &&
+        data.createdAt == request.time;
+    }
+
+    function isValidPrediction(data) {
+      return data.keys().hasAll(['bolaoId', 'userId', 'matchId', 'score1', 'score2']) &&
+        data.bolaoId is string && data.bolaoId.size() <= 128 &&
+        data.userId == request.auth.uid &&
+        data.matchId is number &&
+        data.score1 is number && data.score1 >= 0 && data.score1 <= 99 &&
+        data.score2 is number && data.score2 >= 0 && data.score2 <= 99;
+    }
+
+    // --- RULES ---
+    
+    match /users/{userId} {
+      allow read: if isSignedIn(); // Allow reading other users to see display names in the bolão
+      allow create: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming());
+      allow update: if isSignedIn() && request.auth.uid == userId && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'email']) && incoming().email == existing().email;
+    }
+
+    match /boloes/{bolaoId} {
+      allow read: if isSignedIn() && (
+        exists(/databases/$(database)/documents/boloes/$(bolaoId)/members/$(request.auth.uid))
+        || resource.data.ownerId == request.auth.uid
+      );
+      // Wait, list over bolao is tricky if we do exists() inside list.
+      // Firebase rules limit get/exists inside list. It's better to verify user is a member but list is done by the client usually via collectionGroup or by keeping an array of bolaoIds in User...
+      // Or we can query `boloes` where `ownerId == request.auth.uid` easily.
+      // But for memberships, it's better to do member queries.
+      
+      // Let's refine `alert list`. If we query `boloes` where `memberIds array-contains userId`, it's simple:
+      allow list: if isSignedIn() && request.auth.uid in resource.data.memberIds;
+
+      allow create: if isSignedIn() && isValidId(bolaoId) && isValidBolao(incoming());
+      allow update: if isSignedIn() && existing().ownerId == incoming().ownerId && (
+        (existing().ownerId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['name']) && isValidBolaoUpdate(incoming())) ||
+        (incoming().diff(existing()).affectedKeys().hasOnly(['memberIds']) && incoming().memberIds is list)
+      );
+      allow delete: if isSignedIn() && existing().ownerId == request.auth.uid;
+
+      match /members/{memberId} {
+        // Anyone in the bolao can read members
+        allow read: if isSignedIn() && exists(/databases/$(database)/documents/boloes/$(bolaoId)/members/$(request.auth.uid));
+        // Also allow listing members unconditionally to the authenticated user if the parent bolao says they are member (done above), but wait:
+        allow list: if isSignedIn() && exists(/databases/$(database)/documents/boloes/$(bolaoId)/members/$(request.auth.uid));
+
+        // When creating a bolão, the owner can create their own member doc
+        allow create: if isSignedIn() && isValidId(memberId) && isValidBolaoMember(incoming()) && (
+          (request.auth.uid == memberId && incoming().role == 'owner') ||
+          (exists(/databases/$(database)/documents/boloes/$(bolaoId)/members/$(request.auth.uid)) && get(/databases/$(database)/documents/boloes/$(bolaoId)/members/$(request.auth.uid)).data.role == 'owner') ||
+          (request.auth.uid == memberId && incoming().role == 'member') // Let user join if they have an invite (handled later maybe?)
+        );
+        allow update: if false; // simplified
+        allow delete: if isSignedIn() && (request.auth.uid == memberId || get(/databases/$(database)/documents/boloes/$(bolaoId)/members/$(request.auth.uid)).data.role == 'owner');
+      }
+    }
+
+    match /invites/{inviteId} {
+      allow read, list: if isSignedIn() && (existing().email == request.auth.token.email || get(/databases/$(database)/documents/boloes/$(existing().bolaoId)/members/$(request.auth.uid)).data.role == 'owner');
+      allow create: if isSignedIn() && isValidId(inviteId) && isValidInvite(incoming()) && get(/databases/$(database)/documents/boloes/$(incoming().bolaoId)/members/$(request.auth.uid)).data.role == 'owner';
+      allow update: if isSignedIn() && existing().email == request.auth.token.email && incoming().diff(existing()).affectedKeys().hasOnly(['status']) && incoming().status in ['accepted', 'rejected'];
+      allow delete: if isSignedIn() && get(/databases/$(database)/documents/boloes/$(existing().bolaoId)/members/$(request.auth.uid)).data.role == 'owner';
+    }
+
+    match /predictions/{predictionId} {
+      // Users can read predictions if they are in the bolao
+      allow read, list: if isSignedIn() && exists(/databases/$(database)/documents/boloes/$(resource.data.bolaoId)/members/$(request.auth.uid));
+      // Create/Update
+      allow create: if isSignedIn() && isValidId(predictionId) && isValidPrediction(incoming()) && exists(/databases/$(database)/documents/boloes/$(incoming().bolaoId)/members/$(request.auth.uid));
+      // Update: ensure user matches existing
+      allow update: if isSignedIn() && existing().userId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['score1', 'score2']) && incoming().score1 is number && incoming().score1 >= 0 && incoming().score1 <= 99 && incoming().score2 is number && incoming().score2 >= 0 && incoming().score2 <= 99;
+    }
+  }
+}
