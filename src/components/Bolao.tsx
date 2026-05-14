@@ -110,7 +110,7 @@ const PredictionRow: React.FC<{ match: any, userPrediction: any, bolaoId: string
   );
 }
 
-function BolaoDetails({ bolaoId, bolaoName, onBack }: { bolaoId: string, bolaoName: string, onBack: () => void }) {
+function BolaoDetails({ bolaoId, bolaoName, onBack, matches }: { bolaoId: string, bolaoName: string, onBack: () => void, matches: typeof INITIAL_MATCHES }) {
   const [inviteEmail, setInviteEmail] = useState('');
   const [members, setMembers] = useState<any[]>([]);
   const [predictions, setPredictions] = useState<any[]>([]);
@@ -144,7 +144,7 @@ function BolaoDetails({ bolaoId, bolaoName, onBack }: { bolaoId: string, bolaoNa
     let points = 0;
     let exatos = 0;
     predictions.filter(p => p.userId === m.userId).forEach(p => {
-      const match = INITIAL_MATCHES.find(match => match.id === p.matchId);
+      const match = matches.find(match => match.id === p.matchId);
       if (match && match.status === 'Finalizado') {
         const pred1 = Number(p.score1);
         const pred2 = Number(p.score2);
@@ -307,7 +307,7 @@ function BolaoDetails({ bolaoId, bolaoName, onBack }: { bolaoId: string, bolaoNa
           <div className="mb-4 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-200">
             Preencha seus palpites para os jogos da Copa. Os palpites só podem ser alterados antes do início de cada partida.
           </div>
-          {INITIAL_MATCHES.map(match => {
+          {matches.map(match => {
              const userPrediction = predictions.find(p => p.userId === auth.currentUser?.uid && p.matchId === match.id);
              return (
                <PredictionRow
@@ -329,7 +329,7 @@ function BolaoDetails({ bolaoId, bolaoName, onBack }: { bolaoId: string, bolaoNa
               Nenhum palpite foi registrado ainda neste bolão.
             </div>
           ) : (
-            INITIAL_MATCHES.map(match => {
+            matches.map(match => {
               const matchPredictions = predictions.filter(p => p.matchId === match.id);
               if (matchPredictions.length === 0) return null;
               
@@ -390,7 +390,11 @@ function BolaoDetails({ bolaoId, bolaoName, onBack }: { bolaoId: string, bolaoNa
   );
 }
 
-export function Bolao() {
+interface BolaoProps {
+  matches: typeof INITIAL_MATCHES;
+}
+
+export function Bolao({ matches }: BolaoProps) {
   const [user, setUser] = useState(auth.currentUser);
   const [boloes, setBoloes] = useState<any[]>([]);
   const [invites, setInvites] = useState<any[]>([]);
@@ -519,6 +523,7 @@ export function Bolao() {
           bolaoId={selectedBolao} 
           bolaoName={boloes.find(b => b.id === selectedBolao)?.name || 'Bolão'} 
           onBack={() => setSelectedBolao(null)} 
+          matches={matches}
         />
       ) : (
         <>

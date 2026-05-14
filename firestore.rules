@@ -58,6 +58,11 @@ service cloud.firestore {
 
     // --- RULES ---
     
+    match /matches/{matchId} {
+      allow read: if true;
+      allow write: if isSignedIn(); // allow any authenticated user to update for demo purposes
+    }
+
     match /users/{userId} {
       allow read: if isSignedIn(); // Allow reading other users to see display names in the bolão
       allow create: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming());

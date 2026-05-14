@@ -13,6 +13,8 @@ import { CountryFlag } from './components/CountryFlag';
 import { AdBanner } from './components/AdBanner';
 
 import { INITIAL_MATCHES, GROUPS, KNOCKOUT_ROUNDS, SCORERS, HOST_CITIES } from './data';
+import { collection, onSnapshot, query, writeBatch, doc } from 'firebase/firestore';
+import { db } from './firebase';
 
 // --- COMPONENTS ---
 
@@ -277,9 +279,11 @@ function MatchCard({ match }: { match: typeof INITIAL_MATCHES[0], key?: React.Ke
 // --- MAIN APP ---
 
 import { LanguageContext, useTranslation, translations } from './i18n';
+import { Landing } from './components/Landing';
 
 export default function AppWrapper() {
   const [lang, setLang] = useState<'pt' | 'en'>('pt');
+  const [showApp, setShowApp] = useState(false);
   
   return (
     <LanguageContext.Provider value={{
@@ -287,7 +291,7 @@ export default function AppWrapper() {
       setLang,
       t: (key) => translations[lang]?.[key] || key
     }}>
-      <App />
+      {showApp ? <App /> : <Landing onEnter={() => setShowApp(true)} />}
     </LanguageContext.Provider>
   );
 }
@@ -351,22 +355,36 @@ function App() {
     return newGroups;
   }, [matches]);
 
-  // Live score simulator
+  // Live matches from Firestore
   useEffect(() => {
-    const timer = setInterval(() => {
-      setMatches(currentMatches => 
-        currentMatches.map(match => {
-          if (match.status === 'Em andamento') {
-            // 5% chance of scoring every 3 seconds for simulation
-            const random = Math.random();
-            if (random < 0.05) return { ...match, score1: (match.score1 || 0) + 1 };
-            if (random > 0.95) return { ...match, score2: (match.score2 || 0) + 1 };
-          }
-          return match;
-        })
-      );
-    }, 3000);
-    return () => clearInterval(timer);
+    const matchesRef = collection(db, 'matches');
+    const q = query(matchesRef);
+    
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      if (snapshot.empty) {
+        setMatches(INITIAL_MATCHES);
+        // Seed the collection for the first time if needed
+        try {
+          const batch = writeBatch(db);
+          INITIAL_MATCHES.forEach(match => {
+            const docRef = doc(matchesRef, String(match.id));
+            batch.set(docRef, match);
+          });
+          await batch.commit();
+        } catch (err) {
+          console.error('Failed to seed matches (possibly need to be signed in):', err);
+        }
+      } else {
+        const firestoreMatches: any[] = [];
+        snapshot.forEach(document => firestoreMatches.push({ id: Number(document.id), ...document.data() }));
+        firestoreMatches.sort((a, b) => a.id - b.id);
+        
+        // Map any newly fetched data format to match INITIAL_MATCHES
+        setMatches(firestoreMatches as typeof INITIAL_MATCHES);
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -566,7 +584,7 @@ function App() {
             </div>
           )}
 
-          {activeTab === 'bolao' && <div className="max-w-3xl mx-auto"><Bolao /></div>}
+          {activeTab === 'bolao' && <div className="max-w-3xl mx-auto"><Bolao matches={matches} /></div>}
         </main>
 
         {/* Bottom Navigation (Mobile Only) */}
