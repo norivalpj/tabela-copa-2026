@@ -14,6 +14,17 @@ export function AdBanner({ adSlot, adFormat = 'auto', className = '' }: AdBanner
   // <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
   
   useEffect(() => {
+    // Dynamically inject script if it doesn't exist
+    const client = import.meta.env?.VITE_ADSENSE_CLIENT_ID || "ca-pub-7988921306352815";
+    let script = document.querySelector(`script[src*="adsbygoogle.js"]`);
+    if (!script) {
+      script = document.createElement('script');
+      (script as HTMLScriptElement).src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
+      (script as HTMLScriptElement).async = true;
+      (script as HTMLScriptElement).crossOrigin = "anonymous";
+      document.head.appendChild(script);
+    }
+  
     // Push ads to the array when the component mounts
     try {
       // @ts-ignore
@@ -37,7 +48,7 @@ export function AdBanner({ adSlot, adFormat = 'auto', className = '' }: AdBanner
       <ins
         className="adsbygoogle block"
         style={{ display: 'block' }}
-        data-ad-client={import.meta.env.VITE_ADSENSE_CLIENT_ID || "ca-pub-placeholder"}
+        data-ad-client={import.meta.env?.VITE_ADSENSE_CLIENT_ID || "ca-pub-7988921306352815"}
         data-ad-slot={adSlot}
         data-ad-format={adFormat}
         data-full-width-responsive="true"
