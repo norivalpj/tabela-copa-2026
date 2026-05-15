@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Trophy, Calendar, LayoutGrid, ChevronRight, Medal, Circle, MapPin, ChevronDown, ChevronUp, BarChart2, Target, Globe } from 'lucide-react';
+import { Trophy, Calendar, LayoutGrid, ChevronRight, Medal, Circle, MapPin, ChevronDown, ChevronUp, BarChart2, Target, Globe, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
 
@@ -280,25 +280,43 @@ function MatchCard({ match }: { match: typeof INITIAL_MATCHES[0], key?: React.Ke
 
 import { LanguageContext, useTranslation, translations } from './i18n';
 import { Landing } from './components/Landing';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 
 export default function AppWrapper() {
   const [lang, setLang] = useState<'pt' | 'en'>('pt');
-  const [showApp, setShowApp] = useState(false);
   
   return (
-    <LanguageContext.Provider value={{
-      lang,
-      setLang,
-      t: (key) => translations[lang]?.[key] || key
-    }}>
-      {showApp ? <App /> : <Landing onEnter={() => setShowApp(true)} />}
-    </LanguageContext.Provider>
+    <BrowserRouter>
+      <LanguageContext.Provider value={{
+        lang,
+        setLang,
+        t: (key) => translations[lang]?.[key] || key
+      }}>
+        <MainRoutes />
+      </LanguageContext.Provider>
+    </BrowserRouter>
+  );
+}
+
+function MainRoutes() {
+  const navigate = useNavigate();
+  return (
+    <Routes>
+      <Route path="/" element={<Landing onEnter={() => navigate('/groups')} />} />
+      <Route path="/*" element={<App />} />
+    </Routes>
   );
 }
 
 function App() {
   const { t, lang, setLang } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'groups' | 'matches' | 'knockout' | 'scorers' | 'cities' | 'bolao'>('groups');
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const currentPath = location.pathname.substring(1);
+  const activeTab = ['groups', 'matches', 'knockout', 'scorers', 'cities', 'bolao'].includes(currentPath) ? currentPath : 'groups';
+  
+  const setActiveTab = (tab: string) => navigate(`/${tab}`);
   const [matches, setMatches] = useState(INITIAL_MATCHES);
 
   const dynamicGroups = React.useMemo(() => {
@@ -568,12 +586,23 @@ function App() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                             <div className="absolute bottom-4 left-4 right-4 text-white">
                               <h4 className="font-bold text-xl leading-tight text-shadow-sm">{city.name}</h4>
-                              <p className="text-sm text-gray-200 mt-1 opacity-90">{city.stadium}</p>
+                              <p className="text-sm border border-white/20 bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded-full inline-block mt-2">{city.stadium}</p>
                             </div>
                           </div>
-                          <div className="px-4 py-3 bg-white flex justify-between items-center text-sm">
-                            <span className="text-gray-500 font-medium">Capacidade</span>
-                            <span className="font-bold text-gray-800">{city.capacity}</span>
+                          <div className="p-4 bg-white text-sm">
+                            <div className="flex justify-between items-center mb-3">
+                              <div className="flex flex-col">
+                                <span className="text-gray-500 font-medium text-xs uppercase tracking-wider">Capacidade</span>
+                                <span className="font-bold text-gray-800">{city.capacity}</span>
+                              </div>
+                              <div className="flex flex-col text-right">
+                                <span className="text-gray-500 font-medium text-xs uppercase tracking-wider">Jogos</span>
+                                <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md inline-block">{city.matchesHosted}</span>
+                              </div>
+                            </div>
+                            <p className="text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3">
+                              {city.info}
+                            </p>
                           </div>
                         </div>
                       ))}
@@ -642,6 +671,16 @@ function App() {
             </button>
           </div>
         </nav>
+        
+        {/* Feedback Button */}
+        <a 
+          href="mailto:3et152@gmail.com?subject=Feedback%20Mundial%2026&body=Olá,%20tenho%20uma%20sugestão/bug%20para%20reportar:" 
+          className="fixed bottom-20 md:bottom-6 right-6 bg-emerald-600 text-white p-3 md:px-4 md:py-3 rounded-full shadow-lg hover:bg-emerald-700 hover:shadow-xl transition-all flex items-center justify-center gap-2 z-50 hover:-translate-y-1"
+          title="Enviar sugestão ou reportar bug"
+        >
+          <MessageSquare size={22} className="fill-emerald-50" />
+          <span className="hidden md:inline font-bold text-sm tracking-wide">Feedback</span>
+        </a>
       </div>
     </div>
   );

@@ -512,9 +512,10 @@ export function Bolao({ matches }: BolaoProps) {
         <h2 className="text-lg font-bold text-gray-800">Meus Bolões</h2>
         <button 
           onClick={() => auth.signOut()}
-          className="text-sm text-gray-500 hover:text-red-500 font-medium"
+          title="Sair / Logout"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-100 transition border border-red-100"
         >
-          Sair
+          <X size={16} /> Sair
         </button>
       </div>
 

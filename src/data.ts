@@ -64,39 +64,45 @@ export const KNOCKOUT_ROUNDS = [
 ];
 
 export const SCORERS = [
-  { id: 1, name: 'K. Mbappé', team: 'França', flag: 'fr', goals: 6 },
-  { id: 2, name: 'Vini Jr.', team: 'Brasil', flag: 'br', goals: 5 },
-  { id: 3, name: 'H. Kane', team: 'Inglaterra', flag: 'gb-eng', goals: 4 },
-  { id: 4, name: 'L. Messi', team: 'Argentina', flag: 'ar', goals: 3 },
-  { id: 5, name: 'J. Bellingham', team: 'Inglaterra', flag: 'gb-eng', goals: 3 },
-  { id: 6, name: 'R. Leão', team: 'Portugal', flag: 'pt', goals: 2 },
-  { id: 7, name: 'J. Musiala', team: 'Alemanha', flag: 'de', goals: 2 },
+  { id: 1, name: 'K. Mbappé', team: 'França', flag: 'fr', goals: 0 },
+  { id: 2, name: 'Vini Jr.', team: 'Brasil', flag: 'br', goals: 0 },
+  { id: 3, name: 'H. Kane', team: 'Inglaterra', flag: 'gb-eng', goals: 0 },
+  { id: 4, name: 'L. Messi', team: 'Argentina', flag: 'ar', goals: 0 },
+  { id: 5, name: 'J. Bellingham', team: 'Inglaterra', flag: 'gb-eng', goals: 0 },
+  { id: 6, name: 'R. Leão', team: 'Portugal', flag: 'pt', goals: 0 },
+  { id: 7, name: 'J. Musiala', team: 'Alemanha', flag: 'de', goals: 0 },
 ];
 
 export const HOST_CITIES = [
   { 
     country: 'Canadá', flag: 'ca', 
     cities: [
-      { name: 'Toronto', stadium: 'BMO Field', capacity: '45.000', img: 'https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=800&q=80' },
-      { name: 'Vancouver', stadium: 'BC Place', capacity: '54.500', img: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=80' }
+      { name: 'Toronto', stadium: 'BMO Field', capacity: '45.000', matchesHosted: 6, info: 'Localizado no Exhibition Place, expandido especialmente para a Copa do Mundo.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/9/91/Toronto_BMO_Field_in_2024.jpg&w=800&h=500&fit=cover' },
+      { name: 'Vancouver', stadium: 'BC Place', capacity: '54.500', matchesHosted: 7, info: 'Conhecido por seu telão central gigante e teto retrátil.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/f/ff/BC_Place_2015_Women%2527s_FIFA_World_Cup.jpg&w=800&h=500&fit=cover' }
     ] 
   },
   { 
     country: 'México', flag: 'mx', 
     cities: [
-      { name: 'Cidade do México', stadium: 'Estádio Azteca', capacity: '83.264', img: 'https://images.unsplash.com/photo-1518605368461-1e1e1fd12198?w=800&q=80' },
-      { name: 'Guadalajara', stadium: 'Estádio Akron', capacity: '48.071', img: 'https://images.unsplash.com/photo-1556056504-5c7696c4c28d?w=800&q=80' },
-      { name: 'Monterrey', stadium: 'Estádio BBVA', capacity: '53.500', img: 'https://images.unsplash.com/photo-1508344928928-7165b67de128?w=800&q=80' }
+      { name: 'Cidade do México', stadium: 'Estádio Azteca', capacity: '83.264', matchesHosted: 5, info: 'Primeiro estádio a sediar a abertura (e jogos) em três Copas do Mundo diferentes (1970, 1986, 2026).', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/0/07/Vista_a%25C3%25A9rea_del_Estadio_Azteca_-_2026_-_02.jpg&w=800&h=500&fit=cover' },
+      { name: 'Guadalajara', stadium: 'Estádio Akron', capacity: '48.071', matchesHosted: 4, info: 'Famoso pelo seu formato de vulcão, perfeitamente integrado à paisagem natural.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/1/10/Estadio_Akron_02-07-2022_cabecera_sur_lado_derecho_%283%29.jpg&w=800&h=500&fit=cover' },
+      { name: 'Monterrey', stadium: 'Estádio BBVA', capacity: '53.500', matchesHosted: 4, info: 'Apelidado de "O Gigante de Aço", oferece vistas deslumbrantes da montanha Cerro de la Silla.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/5/57/Mexico_Guadalupe_Monterrey_Estadio_BBVA_Bancomer_fifa_world_cup_2026_6.JPG&w=800&h=500&fit=cover' }
     ] 
   },
   { 
     country: 'Estados Unidos', flag: 'us', 
     cities: [
-      { name: 'Nova York/NJ', stadium: 'MetLife Stadium', capacity: '82.500', img: 'https://images.unsplash.com/photo-1495563923587-bdc4282494d0?w=800&q=80' },
-      { name: 'Los Angeles', stadium: 'SoFi Stadium', capacity: '70.240', img: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&q=80' },
-      { name: 'Dallas', stadium: 'AT&T Stadium', capacity: '80.000', img: 'https://images.unsplash.com/photo-1518605368461-1e1e1fd12198?w=800&q=80' },
-      { name: 'Miami', stadium: 'Hard Rock Stadium', capacity: '64.767', img: 'https://images.unsplash.com/photo-1556056504-5c7696c4c28d?w=800&q=80' },
-      { name: 'Atlanta', stadium: 'Mercedes-Benz Stadium', capacity: '71.000', img: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=80' }
+      { name: 'Nova York/NJ', stadium: 'MetLife Stadium', capacity: '82.500', matchesHosted: 8, info: 'O palco da grande Final da Copa do Mundo FIFA 26.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/0/04/Metlife_stadium_%28Aerial_view%29.jpg&w=800&h=500&fit=cover' },
+      { name: 'Los Angeles', stadium: 'SoFi Stadium', capacity: '70.240', matchesHosted: 8, info: 'O estádio mais caro já construído no mundo, com tecnologia de ponta.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/b/b3/SoFi_Stadium_2023.jpg&w=800&h=500&fit=cover' },
+      { name: 'Dallas', stadium: 'AT&T Stadium', capacity: '80.000', matchesHosted: 9, info: 'Possui uma das maiores telas e sediará o maior número de jogos no torneio.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/1/11/Arlington_June_2020_4_%28AT%2526T_Stadium%29.jpg&w=800&h=500&fit=cover' },
+      { name: 'Miami', stadium: 'Hard Rock Stadium', capacity: '64.767', matchesHosted: 7, info: 'Sede da final da Copa América 2024 e local de partidas cruciais.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/c/ce/Hard_Rock_Stadium_for_Super_Bowl_LIV_%2849606710103%29.jpg&w=800&h=500&fit=cover' },
+      { name: 'Atlanta', stadium: 'Mercedes-Benz Stadium', capacity: '71.000', matchesHosted: 8, info: 'Conhecido por seu telão 360 graus (Halo Board) e design arrojado.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/1/10/Mercedes_Benz_Stadium_time_lapse_capture_2017-08-13.jpg&w=800&h=500&fit=cover' },
+      { name: 'Boston', stadium: 'Gillette Stadium', capacity: '65.878', matchesHosted: 7, info: 'Passou por grandes renovações incluindo o maior placar externo de estádio.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/d/db/Gillette_Stadium_%28Top_View%29.jpg&w=800&h=500&fit=cover' },
+      { name: 'Filadélfia', stadium: 'Lincoln Financial Field', capacity: '69.328', matchesHosted: 6, info: 'Estádio totalmente focado em sustentabilidade e energia renovável.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/a/a1/Lincoln_Financial_Field_%28Aerial_view%29.jpg&w=800&h=500&fit=cover' },
+      { name: 'Houston', stadium: 'NRG Stadium', capacity: '72.220', matchesHosted: 7, info: 'Primeiro estádio da NFL com teto retrátil.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/3/3e/Nrg_stadium.jpg&w=800&h=500&fit=cover' },
+      { name: 'Kansas City', stadium: 'Arrowhead Stadium', capacity: '73.019', matchesHosted: 6, info: 'Reconhecido pelo Guinness Book como o estádio aberto mais barulhento do mundo.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/a/ac/Aerial_view_of_Arrowhead_Stadium_08-31-2013.jpg&w=800&h=500&fit=cover' },
+      { name: 'Seattle', stadium: 'Lumen Field', capacity: '69.000', matchesHosted: 6, info: 'Local com uma das bases de fãs de futebol mais apaixonadas dos EUA.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/5/53/Qwest_Field_North.jpg&w=800&h=500&fit=cover' },
+      { name: 'San Francisco Bay Area', stadium: 'Levi\'s Stadium', capacity: '68.500', matchesHosted: 6, info: 'Um estádio high-tech no coração do Vale do Silício.', img: 'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/a/a6/Levi%2527s_Stadium_in_February_2016_prior_to_Super_Bowl_50_%2824398261729%29.jpg&w=800&h=500&fit=cover' }
     ] 
   }
 ];

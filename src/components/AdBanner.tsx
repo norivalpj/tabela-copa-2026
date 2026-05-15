@@ -25,14 +25,21 @@ export function AdBanner({ adSlot, adFormat = 'auto', className = '' }: AdBanner
       document.head.appendChild(script);
     }
   
+    if (!adSlot) return;
+
     // Push ads to the array when the component mounts
     try {
       // @ts-ignore
       (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (err) {
-      console.error('AdSense error:', err);
+    } catch (err: any) {
+      if (err.message && err.message.includes('already have ads')) {
+        // Ignored. This typically happens in React StrictMode during dev
+        console.warn('AdSense already loaded for this banner.');
+      } else {
+        console.error('AdSense error:', err);
+      }
     }
-  }, []);
+  }, [adSlot]);
 
   if (!adSlot) {
     // Return a placeholder for development/preview
