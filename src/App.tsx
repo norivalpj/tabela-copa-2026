@@ -163,16 +163,16 @@ function MatchCard({ match }: { match: typeof INITIAL_MATCHES[0], key?: React.Ke
             </div>
             <motion.span 
               key={match.score1}
-              initial={isLive ? { scale: 1.5, color: '#10b981' } : false}
-              animate={{ scale: 1, color: isFinished || isLive ? '#111827' : '#d1d5db' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-              className={`text-xl font-bold ${isFinished || isLive ? 'text-gray-900' : 'text-gray-300'}`}
+              initial={isLive ? { scale: 1.3, backgroundColor: '#10b981', color: '#ffffff' } : false}
+              animate={{ scale: 1, backgroundColor: 'transparent', color: isFinished || isLive ? '#111827' : '#d1d5db' }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className={`text-xl font-bold px-3 py-1 rounded-md ${isFinished || isLive ? 'text-gray-900' : 'text-gray-300'}`}
             >
               {match.score1 !== null ? match.score1 : '-'}
             </motion.span>
           </div>
           
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mt-1">
             <div className="flex items-center gap-3">
               <motion.span 
                 whileHover={{ scale: 1.2, rotate: 5 }}
@@ -184,10 +184,10 @@ function MatchCard({ match }: { match: typeof INITIAL_MATCHES[0], key?: React.Ke
             </div>
             <motion.span 
               key={match.score2}
-              initial={isLive ? { scale: 1.5, color: '#10b981' } : false}
-              animate={{ scale: 1, color: isFinished || isLive ? '#111827' : '#d1d5db' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-              className={`text-xl font-bold ${isFinished || isLive ? 'text-gray-900' : 'text-gray-300'}`}
+              initial={isLive ? { scale: 1.3, backgroundColor: '#10b981', color: '#ffffff' } : false}
+              animate={{ scale: 1, backgroundColor: 'transparent', color: isFinished || isLive ? '#111827' : '#d1d5db' }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className={`text-xl font-bold px-3 py-1 rounded-md ${isFinished || isLive ? 'text-gray-900' : 'text-gray-300'}`}
             >
               {match.score2 !== null ? match.score2 : '-'}
             </motion.span>
@@ -282,6 +282,8 @@ import { LanguageContext, useTranslation, translations } from './i18n';
 import { Landing } from './components/Landing';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 
+import { FeedbackModal } from './components/FeedbackModal';
+
 export default function AppWrapper() {
   const [lang, setLang] = useState<'pt' | 'en'>('pt');
   
@@ -318,6 +320,7 @@ function App() {
   
   const setActiveTab = (tab: string) => navigate(`/${tab}`);
   const [matches, setMatches] = useState(INITIAL_MATCHES);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   const dynamicGroups = React.useMemo(() => {
     const newGroups = GROUPS.map(g => ({
@@ -475,11 +478,13 @@ function App() {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10 pb-24 md:pb-8 bg-[#f8fafc]">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10 pb-24 md:pb-8 bg-[#f8fafc] w-full">
           
-          <div className="max-w-4xl mx-auto mb-6">
-            <AdBanner className="w-full h-auto min-h-[90px]" />
-          </div>
+          {['groups', 'matches', 'knockout', 'scorers', 'cities'].includes(activeTab) && (
+            <div className="max-w-4xl mx-auto mb-6">
+              <AdBanner className="w-full h-auto min-h-[90px]" />
+            </div>
+          )}
 
           {activeTab === 'groups' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 max-w-4xl mx-auto">
@@ -508,9 +513,10 @@ function App() {
                 <div key={round.name} className="mb-8">
                   <h3 className="text-sm font-semibold text-emerald-600 bg-emerald-50 py-1.5 px-3 rounded-md inline-block uppercase tracking-wider mb-4">{round.name}</h3>
                   <div className="grid grid-cols-1 gap-4">
-                    {round.matches.map(match => (
-                      <MatchCard key={match.id} match={match as any} />
-                    ))}
+                    {round.matches.map(staticMatch => {
+                      const liveMatch = matches.find(m => m.id === staticMatch.id) || staticMatch;
+                      return <MatchCard key={staticMatch.id} match={liveMatch as any} />;
+                    })}
                   </div>
                 </div>
               ))}
@@ -617,70 +623,67 @@ function App() {
         </main>
 
         {/* Bottom Navigation (Mobile Only) */}
-        <nav className="md:hidden bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 w-full py-2 flex justify-around items-center pb-safe z-[999] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] overflow-x-auto no-scrollbar">
-          <div className="flex justify-around items-center w-full min-w-[360px] px-2 gap-1">
-            <button 
-              onClick={() => setActiveTab('groups')}
-              className={`flex flex-col items-center gap-1 w-12 flex-shrink-0 ${activeTab === 'groups' ? 'text-emerald-700' : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              <LayoutGrid size={22} className={activeTab === 'groups' ? 'fill-emerald-50' : ''} />
-              <span className="text-[9px] font-medium uppercase tracking-wider text-center w-full truncate">Grupos</span>
-            </button>
-            
-            <button 
-              onClick={() => setActiveTab('matches')}
-              className={`flex flex-col items-center gap-1 w-12 flex-shrink-0 ${activeTab === 'matches' ? 'text-emerald-700' : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              <Calendar size={22} className={activeTab === 'matches' ? 'fill-emerald-50' : ''} />
-              <span className="text-[9px] font-medium uppercase tracking-wider text-center w-full truncate">Jogos</span>
-            </button>
-            
-            <button 
-              onClick={() => setActiveTab('knockout')}
-              className={`flex flex-col items-center gap-1 w-12 flex-shrink-0 ${activeTab === 'knockout' ? 'text-emerald-700' : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              <Trophy size={22} className={activeTab === 'knockout' ? 'fill-emerald-50' : ''} />
-              <span className="text-[9px] font-medium uppercase tracking-wider text-center w-full truncate">Finais</span>
-            </button>
-
-            <button 
-              onClick={() => setActiveTab('scorers')}
-              className={`flex flex-col items-center gap-1 w-12 flex-shrink-0 ${activeTab === 'scorers' ? 'text-emerald-700' : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              <Medal size={22} className={activeTab === 'scorers' ? 'fill-emerald-50' : ''} />
-              <span className="text-[9px] font-medium uppercase tracking-wider text-center w-full truncate">Gols</span>
-            </button>
-
-            <button 
-              onClick={() => setActiveTab('cities')}
-              className={`flex flex-col items-center gap-1 w-12 flex-shrink-0 ${activeTab === 'cities' ? 'text-emerald-700' : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              <MapPin size={22} className={activeTab === 'cities' ? 'fill-emerald-50' : ''} />
-              <span className="text-[9px] font-medium uppercase tracking-wider text-center w-full truncate">Sedes</span>
-            </button>
-
-            <button 
-              onClick={() => setActiveTab('bolao')}
-              className={`flex flex-col items-center gap-1 w-12 flex-shrink-0 ${activeTab === 'bolao' ? 'text-emerald-700' : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              <div className="relative">
-                <Target size={22} className={activeTab === 'bolao' ? 'fill-emerald-50' : ''} />
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white flex items-center justify-center"></div>
-              </div>
-              <span className="text-[9px] font-medium uppercase tracking-wider text-center w-full truncate">Bolão</span>
-            </button>
+        <nav className="md:hidden bg-white/95 backdrop-blur-md border-t border-gray-100 fixed bottom-0 left-0 right-0 w-full z-[999] shadow-[0_-8px_20px_-10px_rgba(0,0,0,0.1)] pb-safe">
+          <div className="flex items-center w-full overflow-x-auto no-scrollbar px-2 py-3 gap-1">
+            {[
+              { id: 'groups', icon: LayoutGrid, text: t('groups') },
+              { id: 'matches', icon: Calendar, text: t('matches') },
+              { id: 'knockout', icon: Trophy, text: t('knockout') },
+              { id: 'scorers', icon: Medal, text: t('scorers') },
+              { id: 'cities', icon: MapPin, text: t('cities') },
+              { id: 'bolao', icon: Target, text: t('pool'), badge: true }
+            ].map((tab) => {
+              const isActive = activeTab === tab.id;
+              const Icon = tab.icon;
+              return (
+                <button 
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap transition-all duration-300 flex-shrink-0 ${isActive ? 'bg-emerald-100 text-emerald-800' : 'text-gray-500 hover:text-emerald-700 hover:bg-emerald-50'}`}
+                >
+                  <div className="relative">
+                    <Icon size={20} className={isActive ? 'fill-emerald-200' : ''} />
+                    {tab.badge && (
+                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white flex items-center justify-center"></div>
+                    )}
+                  </div>
+                  {isActive && (
+                    <motion.span 
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: 'auto' }}
+                      className="text-sm font-bold tracking-wide"
+                    >
+                      {tab.text}
+                    </motion.span>
+                  )}
+                  {isActive && (
+                    <motion.div
+                      layoutId="bottomNavIndicator"
+                      className="absolute inset-0 bg-emerald-100 rounded-full -z-10"
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </nav>
         
         {/* Feedback Button */}
-        <a 
-          href="mailto:3et152@gmail.com?subject=Feedback%20Mundial%2026&body=Olá,%20tenho%20uma%20sugestão/bug%20para%20reportar:" 
+        <button 
+          onClick={() => setShowFeedbackModal(true)}
           className="fixed bottom-20 md:bottom-6 right-6 bg-emerald-600 text-white p-3 md:px-4 md:py-3 rounded-full shadow-lg hover:bg-emerald-700 hover:shadow-xl transition-all flex items-center justify-center gap-2 z-50 hover:-translate-y-1"
           title="Enviar sugestão ou reportar bug"
         >
           <MessageSquare size={22} className="fill-emerald-50" />
           <span className="hidden md:inline font-bold text-sm tracking-wide">Feedback</span>
-        </a>
+        </button>
+        
+        <AnimatePresence>
+          {showFeedbackModal && (
+            <FeedbackModal onClose={() => setShowFeedbackModal(false)} />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
